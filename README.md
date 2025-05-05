@@ -15,6 +15,14 @@
 
 ---
 
+## 🔗 APK Download
+
+You can try the app by downloading the latest APK:
+
+👉 [Download My7Quotes APK](https://drive.google.com/file/d/1H-dxeIxzEEyyIyL0hfdqWQ8ewPH-_HpR/view?usp=sharing)
+
+---
+
 ## 🚀 Getting Started
 
 ### 1. Clone the repository
@@ -45,6 +53,7 @@ This app uses Firebase for syncing quotes and user favorites. You must create yo
    - `appId`
    - `measurementId`
 
+> 🔐 Never share your real Firebase credentials in public repos!
 
 ---
 
