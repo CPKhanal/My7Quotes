@@ -2,17 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy - My7Quotes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
 </head>
-<body>
-    <h1>Privacy Policy</h1>
-    <p>Last Updated: March 2026</p>
-    <p><strong>My7Quotes</strong> is a quote-viewing application. We respect your privacy:</p>
-    <ul>
-        <li><strong>Data Collection:</strong> We do not collect, store, or share any personal information.</li>
-        <li><strong>Permissions:</strong> The app requests notification permission only to send daily quotes at 7:00 AM.</li>
-        <li><strong>Third Parties:</strong> No data is sent to third-party services.</li>
-    </ul>
-    <p>If you have questions, please contact us through the Play Store listing.</p>
+<body class="text-slate-200 min-h-screen flex items-center justify-center p-6">
+
+    <div class="glass max-w-2xl w-full p-8 md:p-12 rounded-3xl shadow-2xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 uppercase">
+                Privacy Policy
+            </h1>
+            <p class="text-xs font-mono text-slate-500 mt-2 tracking-widest uppercase">
+                Last Updated: March 2026
+            </p>
+        </header>
+
+        <div class="space-y-6 text-slate-300 leading-relaxed">
+            <p>
+                <strong class="text-white">My7Quotes</strong> is built as a simple, secure, and inspiring quote-viewing application. Your privacy is our priority.
+            </p>
+
+            <div class="space-y-4">
+                <div class="flex gap-4">
+                    <div class="mt-1.5 h-2 w-2 rounded-full bg-purple-500 shrink-0"></div>
+                    <p><strong class="text-slate-100">Data Collection:</strong> We do not collect, store, or share any personal information. The app functions entirely locally on your device.</p>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="mt-1.5 h-2 w-2 rounded-full bg-purple-500 shrink-0"></div>
+                    <p><strong class="text-slate-100">Permissions:</strong> The app requests <code class="bg-slate-800 px-1 rounded text-pink-400">POST_NOTIFICATIONS</code> permission solely to deliver your daily 7:00 AM inspiration.</p>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="mt-1.5 h-2 w-2 rounded-full bg-purple-500 shrink-0"></div>
+                    <p><strong class="text-slate-100">Third Parties:</strong> No data is transmitted to third-party services, analytics providers, or advertisers.</p>
+                </div>
+            </div>
+
+            <p class="pt-6 border-t border-slate-800 text-sm italic">
+                Questions? Feel free to contact us through our official Google Play Store listing.
+            </p>
+        </div>
+
+        <footer class="mt-12 text-center text-[10px] text-slate-600 uppercase tracking-widest">
+            &copy; 2026 MY7QUOTES SECURITY PROTOCOL
+        </footer>
+    </div>
+
 </body>
 </html>
