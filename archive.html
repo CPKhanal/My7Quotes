@@ -80,9 +80,17 @@
     let allQuotes = [];
     
     // 2. Initialize Supabase
-    const supabaseUrl = window.env.SUPABASE_URL;
-    const supabaseKey = window.env.SUPABASE_ANON_KEY;
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+// NEW WAY (Works on Netlify)
+// We use ?. to prevent crashing if window.env isn't ready yet
+const supabaseUrl = window.env?.SUPABASE_URL;
+const supabaseKey = window.env?.SUPABASE_ANON_KEY;
+
+// Check if they exist before creating the client
+if (!supabaseUrl || !supabaseKey) {
+    console.error("Connection strings missing. Check Netlify Environment Variables.");
+}
+
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     // 3. Fetch data from Supabase instead of JSON
     async function loadData() {
