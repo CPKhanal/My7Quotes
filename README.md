@@ -1,24 +1,40 @@
-# 🌌 My7Quotes
+# MY7QUOTES | The Unspoken Ethics
 
-A minimalist, high-impact "Cold Truths" repository featuring a cyber-dark aesthetic and motion-driven storytelling.
+> **Hard truths for quiet nights.**
+> A digital library of life, love, and the inevitable breakups. Curated for those who prefer truth over comfort.
 
-**🌐 Live Demo:** [my7quotes.netlify.app](https://my7quotes.netlify.app/)
+[**Live Demo**](https://my7quotes.netlify.app/)
 
-### ✨ Highlights
-* **Motion Design:** Powered by **GSAP** & **ScrollTrigger** for smooth entrance animations.
-* **Dynamic Backdrop:** Custom **HTML5 Canvas** starfield with twinkling logic.
-* **Data-Driven:** All quotes are pulled from a central `data.json` for easy updates.
-* **Interactive:** Real-time search, randomizer modal, and one-click clipboard copying.
+---
 
-### 🛠️ Tech Stack
-* **UI:** Tailwind CSS + Google Fonts (Space Grotesk & Playfair Display)
-* **Animation:** GreenSock (GSAP)
-* **Data:** JSON + Fetch API
+## 01. Overview
+MY7QUOTES is a minimalist, serverless web application designed to archive and present "hard truths." The project focuses on a "Zero Emotion State"—providing resonance through shared human experience rather than traditional motivation.
 
-### 🚀 Quick Start
-1. Ensure a `data.json` file exists in the root directory.
-2. Serve via a local web server (e.g., Live Server) to allow the JSON fetch.
-3. Edit the `quotes` array in the JSON to update the archive instantly.
+## 02. Technical Architecture
+The repository is built with a focus on speed, typography, and secure data handling:
+
+* **Frontend:** HTML5, Tailwind CSS (Utility-first styling).
+* **Animations:** GSAP (GreenSock Animation Platform) for fluid transitions and the "Falling Dust" particle engine.
+* **Backend:** Supabase (PostgreSQL) for real-time data retrieval.
+* **Deployment:** Netlify with secure Environment Variable injection for API protection.
+* **Typography:** Inter & Baskervville (Google Fonts).
+
+## 03. Core Features
+* **The Archive:** A searchable grid of fragments pulled directly from a Supabase database.
+* **Quick Insight:** A random discovery engine for immediate reflection.
+* **Responsive Design:** Fully optimized for mobile and desktop "quiet night" viewing.
+* **Clipboard Integration:** One-click sharing of specific record fragments.
+
+## 04. Setup & Installation
+1. Clone the repository.
+2. Create a `quotes` table in a Supabase project with `id` and `content` columns.
+3. For local testing, create an `env-config.js` (not included in repo) to store your keys:
+   ```javascript
+   window.env = {
+     SUPABASE_URL: "your_url",
+     SUPABASE_ANON_KEY: "your_key"
+   };
+4. Deploy to Netlify and use Snippet Injection for production keys.
 
 ### 📄 License
 Distributed under the **Apache License 2.0**.
