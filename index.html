@@ -3,287 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My7Quotes | Cold Truths & Wisdom</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <title>MY7QUOTES | Introduction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Baskervville:ital@0;1&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        :root {
-            --bg: #050505;
-            --accent: #6366f1;
-        }
+        :root { --bg: #0a0a0a; --paper: #f5f5f0; --accent: #c5b358; }
+        body { background-color: var(--bg); color: var(--paper); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .serif { font-family: 'Baskervville', serif; }
+        
+        /* Desktop Nav Link */
+        .nav-link { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; transition: 0.3s; }
+        .nav-link:hover { color: var(--accent); }
+        
+        .btn-minimal { border: 1px solid rgba(255,255,255,0.1); padding: 1rem 2.5rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.4s; cursor: pointer; background: transparent; color: var(--paper); }
+        .btn-minimal:hover { background: var(--paper); color: var(--bg); }
 
-        body {
-            background-color: var(--bg);
-            color: #ffffff;
-            font-family: 'Space Grotesk', sans-serif;
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-        }
-
-        .serif { font-family: 'Playfair Display', serif; }
-
-        /* Smooth Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        .gradient-text {
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .quote-card {
-            background: linear-gradient(145deg, #0f0f0f, #050505);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.4s ease;
-        }
-
-        .quote-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-8px);
-        }
-
-        #bg-canvas {
+        /* Background Canvas */
+        #snow-canvas {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
             pointer-events: none;
-            display: block;
+            opacity: 0.3;
         }
 
-        .stagger-item { opacity: 0; transform: translateY(30px); }
+        /* Mobile Menu Styling */
+        #mobileMenu { background-color: var(--bg); z-index: 100; }
+
+        /* Modal / Card Styling */
+        #quoteModal { background-color: rgba(10, 10, 10, 0.98); backdrop-filter: blur(10px); }
+        .quote-card { border: 1px solid rgba(255, 255, 255, 0.05); background: #0f0f0f; }
     </style>
 </head>
-<body>
+<body class="opacity-0 transition-opacity duration-1000" onload="document.body.style.opacity='1'">
 
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="snow-canvas"></canvas>
 
-   <nav class="fixed top-0 w-full z-50 p-6 flex justify-between items-center backdrop-blur-md border-b border-white/5 bg-black/20">
-    <div class="flex items-center gap-3">
-        <img src="icon.png" alt="Logo" class="w-8 h-8 object-contain">
-        
-        <span class="text-xl font-bold tracking-tighter gradient-text">My7Quotes</span>
+    <nav class="fixed top-0 w-full z-50 p-6 md:p-10 flex justify-between items-center bg-[#0a0a0a]/80 backdrop-blur-md md:bg-transparent">
+        <div class="flex items-center gap-3">
+            <div class="w-1.5 h-1.5 bg-accent"></div>
+            <span class="text-xs font-bold tracking-[0.4em]">MY7QUOTES</span>
+        </div>
+
+        <div class="hidden md:flex gap-12">
+            <a href="index.html" class="nav-link text-accent">Intro</a>
+            <a href="archive.html" class="nav-link">Archive</a>
+            <a href="about.html" class="nav-link">About</a>
+        </div>
+
+        <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1.5">
+            <div class="w-6 h-[1px] bg-white"></div>
+            <div class="w-6 h-[1px] bg-white"></div>
+        </button>
+    </nav>
+
+    <div id="mobileMenu" class="fixed inset-0 hidden flex-col items-center justify-center gap-8">
+        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-xs tracking-widest opacity-50">CLOSE</button>
+        <a href="index.html" class="text-xl serif italic text-accent">Intro</a>
+        <a href="archive.html" class="text-xl serif italic">Archive</a>
+        <a href="about.html" class="text-xl serif italic">About</a>
     </div>
-    <div id="stats" class="text-[10px] tracking-[0.2em] uppercase opacity-50 font-medium hidden sm:block">
-        Initializing Archive...
-    </div>
-</nav>
 
-    <section class="relative h-screen flex flex-col justify-center items-center px-6 text-center z-10">
+    <section class="min-h-screen flex items-center px-8 md:px-24">
         <div class="max-w-4xl">
-            <h1 class="serif text-6xl md:text-8xl mb-6 stagger-item">
-                Cold Truths for <br>
-                <span class="gradient-text italic">Real Souls</span>
-            </h1>
-            <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 stagger-item">
-                A curated collection of reality, heartbreak, and the relentless grind. 
-                Data-driven wisdom delivered straight from the source.
-            </p>
-            <div class="flex flex-wrap gap-4 justify-center stagger-item">
-                <button onclick="document.getElementById('archive').scrollIntoView({behavior:'smooth'})" 
-                        class="px-8 py-4 bg-indigo-600 rounded-full font-bold hover:scale-105 transition-transform">
-                    View Archive
-                </button>
-                <button onclick="showRandom()" class="px-8 py-4 border border-white/10 rounded-full font-bold hover:bg-white/5 transition-all">
-                    Random Insight
-                </button>
+            <span class="text-accent text-[0.6rem] tracking-[0.6em] uppercase mb-8 block">Project Collection 01</span>
+            <h1 class="serif text-5xl md:text-8xl mb-10 leading-[1.1]">Hard truths <br> for <span class="italic text-gray-500">quiet</span> nights.</h1>
+            <p class="text-gray-500 text-lg max-w-xl mb-12 font-light leading-relaxed">A digital library of life, love, and the inevitable breakups. Curated for those who prefer truth over comfort.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-6">
+                <a href="archive.html" class="btn-minimal inline-block text-center">Enter Repository</a>
+                <button onclick="showRandomQuote()" class="btn-minimal">Quick Insight</button>
             </div>
         </div>
     </section>
 
-    <main id="archive" class="relative z-10 bg-black/40 backdrop-blur-3xl border-t border-white/5 min-h-screen pb-20">
-        <div class="container mx-auto max-w-6xl pt-24 px-6">
-            
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-                <div class="w-full md:w-1/2">
-                    <h2 class="text-3xl font-bold mb-6 serif">The Repository</h2>
-                    <input type="text" id="searchInput" placeholder="Search keywords (love, success, pain...)" 
-                           class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all text-white">
-                </div>
-                <div class="text-right text-gray-500 text-xs uppercase tracking-widest" id="searchCount">
-                    All quotes displayed
-                </div>
+    <div id="quoteModal" class="fixed inset-0 z-[101] flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-500">
+        <div class="quote-card max-w-xl w-full p-8 md:p-16 relative">
+            <button onclick="closeModal()" class="absolute top-6 right-8 text-accent text-xs tracking-widest hover:text-white transition">CLOSE</button>
+            <span id="fragmentLabel" class="text-accent/40 text-[0.6rem] tracking-[0.4em] uppercase block mb-10">Fragment_Random</span>
+            <div id="quoteDisplay" class="serif text-2xl md:text-4xl italic leading-tight text-paper mb-12"></div>
+            <div class="flex justify-between items-center border-t border-white/5 pt-8">
+                <span class="text-[0.5rem] tracking-[0.3em] uppercase opacity-30">M7Q Archive</span>
+                <button onclick="showRandomQuote()" class="text-[0.55rem] tracking-widest uppercase text-accent hover:text-white transition">New Insight</button>
             </div>
-
-            <div id="quotesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                </div>
-        </div>
-    </main>
-
-    <div id="modal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 opacity-0 pointer-events-none transition-all duration-300">
-        <div class="bg-[#0a0a0a] border border-indigo-500/20 p-12 rounded-[2rem] max-w-2xl w-full text-center relative shadow-2xl">
-            <button onclick="closeModal()" class="absolute top-6 right-8 text-3xl text-gray-500 hover:text-white">&times;</button>
-            <span class="text-indigo-400 text-[10px] uppercase tracking-[0.4em] mb-6 block">My7Quotes</span>
-            <p id="modalText" class="serif text-2xl md:text-3xl leading-relaxed mb-8 italic"></p>
-            <button onclick="showRandom()" class="text-sm text-gray-500 hover:text-indigo-400 underline underline-offset-8 transition">Give me another</button>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="env-config.js"></script>
+
     <script>
-        let allQuotes = [];
+        // 1. Supabase Initialization
+        const supabaseUrl = window.env.SUPABASE_URL;
+        const supabaseKey = window.env.SUPABASE_ANON_KEY;
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        window.addEventListener('load', async () => {
-            gsap.registerPlugin(ScrollTrigger);
-            
-            // 1. Fetch Data
-            try {
-                const response = await fetch('./data.json');
-                const data = await response.json();
-                allQuotes = data.quotes;
-                document.getElementById('stats').innerText = `${allQuotes.length} TRUTHS ENCRYPTED`;
-                renderQuotes(allQuotes);
-            } catch (err) {
-                console.error("Data.json not found.", err);
-                // Fallback quotes
-                allQuotes = ["The truth is rarely pure and never simple.", "Work until your idols become your rivals.", "Focus on the step, not the mountain."];
-                renderQuotes(allQuotes);
+        // 2. Background Falling Effect
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speed = Math.random() * 0.4 + 0.1;
+                this.opacity = Math.random() * 0.5 + 0.1;
             }
-
-            // 2. Initial Hero Animations
-            gsap.to(".stagger-item", {
-                opacity: 1,
-                y: 0,
-                duration: 1.2,
-                stagger: 0.2,
-                ease: "power4.out"
-            });
-
-            initStarfield();
-            initSearch();
-        });
-
-        function renderQuotes(quotes) {
-            const grid = document.getElementById('quotesGrid');
-            grid.innerHTML = '';
-
-            quotes.forEach((text, i) => {
-                const card = document.createElement('div');
-                card.className = 'quote-card p-10 rounded-3xl relative flex flex-col justify-between opacity-0 translate-y-10';
-                card.innerHTML = `
-                    <div class="relative z-10">
-                        <span class="text-[5rem] absolute -top-10 -right-4 font-black text-white/[0.02] serif select-none">${i+1}</span>
-                        <p class="serif text-xl leading-relaxed italic mb-8">"${text}"</p>
-                    </div>
-                    <div class="flex justify-between items-center pt-6 border-t border-white/5">
-                        <span class="text-[10px] uppercase tracking-widest text-indigo-400">My7Quotes</span>
-                        <button onclick="copyText('${text.replace(/'/g, "\\'")}')" class="opacity-30 hover:opacity-100 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
-
-                gsap.to(card, {
-                    scrollTrigger: {
-                        trigger: card,
-                        start: "top 90%",
-                    },
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8
-                });
-            });
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height) { this.y = -10; this.x = Math.random() * canvas.width; }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(245, 245, 240, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
-        function initSearch() {
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                const filtered = allQuotes.filter(q => q.toLowerCase().includes(term));
-                renderQuotes(filtered);
-                document.getElementById('searchCount').innerText = `${filtered.length} entries found`;
-            });
+        for(let i = 0; i < 100; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 3. Navigation Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if(menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                menu.classList.add('flex');
+                gsap.from(menu.children, { opacity: 0, y: 20, stagger: 0.1 });
+            } else {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex');
+            }
         }
 
-        function showRandom() {
-            const quote = allQuotes[Math.floor(Math.random() * allQuotes.length)];
-            const modal = document.getElementById('modal');
-            document.getElementById('modalText').innerText = `"${quote}"`;
+        // 4. Supabase Quote Logic
+        async function showRandomQuote() {
+            const display = document.getElementById('quoteDisplay');
+            const modal = document.getElementById('quoteModal');
+            const label = document.getElementById('fragmentLabel');
+            
+            display.innerText = "Consulting the archive...";
             modal.classList.remove('pointer-events-none');
-            gsap.to(modal, { opacity: 1, duration: 0.4 });
+            gsap.to(modal, { opacity: 1, duration: 0.6 });
+
+            const randomOffset = Math.floor(Math.random() * 213);
+
+            const { data, error } = await _supabase
+                .from('quotes')
+                .select('id, content')
+                .range(randomOffset, randomOffset)
+                .single();
+
+            if (error) {
+                display.innerText = "The archive is temporarily silent.";
+            } else {
+                display.innerText = `"${data.content}"`;
+                label.innerText = `Fragment_#${data.id}`;
+            }
         }
 
         function closeModal() {
-            const modal = document.getElementById('modal');
-            gsap.to(modal, { 
-                opacity: 0, 
-                duration: 0.3, 
-                onComplete: () => modal.classList.add('pointer-events-none') 
-            });
-        }
-
-        function copyText(txt) {
-            navigator.clipboard.writeText(txt);
-            const btn = event.currentTarget;
-            const original = btn.innerHTML;
-            btn.innerHTML = '<span class="text-[10px] text-green-400">COPIED</span>';
-            setTimeout(() => btn.innerHTML = original, 2000);
-        }
-
-        function initStarfield() {
-            const canvas = document.getElementById('bg-canvas');
-            const ctx = canvas.getContext('2d');
-            let stars = [];
-            
-            const resize = () => {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                createStars(); // Re-populate on resize to fill screen
-            };
-
-            class Star {
-                constructor() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 1.5 + 0.1;
-                    this.speed = Math.random() * 0.3 + 0.05;
-                    this.opacity = Math.random();
-                    this.fadeDirection = Math.random() > 0.5 ? 0.005 : -0.005;
-                }
-                update() {
-                    this.y += this.speed;
-                    if (this.y > canvas.height) this.y = 0;
-
-                    this.opacity += this.fadeDirection;
-                    if (this.opacity > 1 || this.opacity < 0.1) this.fadeDirection *= -1;
-                }
-                draw() {
-                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            function createStars() {
-                stars = [];
-                // Dynamic density: 1 star per 4000 pixels
-                const starCount = Math.floor((canvas.width * canvas.height) / 4000);
-                for(let i=0; i < starCount; i++) {
-                    stars.push(new Star());
-                }
-            }
-
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                stars.forEach(s => { s.update(); s.draw(); });
-                requestAnimationFrame(animate);
-            }
-            
-            window.addEventListener('resize', resize);
-            resize(); // Initial sizing and star creation
-            animate();
+            const modal = document.getElementById('quoteModal');
+            gsap.to(modal, { opacity: 0, duration: 0.4, onComplete: () => modal.classList.add('pointer-events-none') });
         }
     </script>
 </body>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY7QUOTES | Philosophy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Baskervville:ital@0;1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root { --bg: #0a0a0a; --paper: #f5f5f0; --accent: #c5b358; }
+        body { background-color: var(--bg); color: var(--paper); font-family: 'Inter', sans-serif; line-height: 1.8; }
+        .serif { font-family: 'Baskervville', serif; }
+        .nav-link { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; transition: 0.3s; }
+        .nav-link:hover { color: var(--accent); }
+        
+        /* Matching the linear row style from the archive */
+        .philosophy-row { 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            transition: background 0.4s ease;
+        }
+        .philosophy-row:hover {
+            background: rgba(255,255,255,0.02);
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a0a]">
+
+<nav class="fixed top-0 w-full z-50 p-6 md:p-10 flex justify-between items-center bg-[#0a0a0a]/80 backdrop-blur-md md:bg-transparent">
+        <div class="flex items-center gap-3">
+            <div class="w-1.5 h-1.5 bg-accent"></div>
+            <a href="index.html" class="text-xs font-bold tracking-[0.4em] uppercase">MY7QUOTES</a>
+        </div>
+
+        <div class="hidden md:flex gap-12">
+            <a href="index.html" class="nav-link">Intro</a>
+            <a href="archive.html" class="nav-link">Archive</a>
+            <a href="about.html" class="nav-link text-accent">About</a>
+        </div>
+
+        <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1.5">
+            <div class="w-6 h-[1px] bg-white"></div>
+            <div class="w-6 h-[1px] bg-white"></div>
+        </button>
+    </nav>
+
+    <div id="mobileMenu" class="fixed inset-0 hidden flex-col items-center justify-center gap-8 bg-[#0a0a0a] z-[100]">
+        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-xs tracking-widest opacity-50">CLOSE</button>
+        <a href="index.html" class="text-xl serif italic">Intro</a>
+        <a href="archive.html" class="text-xl serif italic">Archive</a>
+        <a href="about.html" class="text-xl serif italic text-accent">About</a>
+    </div>
+
+    <header class="pt-48 pb-20 px-8 md:px-24 border-b border-white/10">
+        <div class="max-w-3xl">
+            <span class="text-accent text-[0.6rem] tracking-[0.6em] uppercase mb-6 block">Our Ethos</span>
+            <h1 class="serif text-5xl md:text-7xl mb-8 leading-tight">The <span class="italic text-gray-500">Unspoken</span> Ethics.</h1>
+            <p class="text-gray-500 text-lg font-light max-w-xl">A digital preservation of thoughts often left unsaid. We focus on the intersection of resilience and the cold reality of human experience.</p>
+        </div>
+    </header>
+
+    <main class="px-8 md:px-24 pb-32">
+        
+        <div class="philosophy-row py-16 md:py-24 flex flex-col md:flex-row gap-8 items-baseline group">
+            <span class="text-[0.65rem] text-accent font-mono w-16 opacity-40 group-hover:opacity-100 transition-opacity">01</span>
+            <div class="flex-1">
+                <h3 class="serif text-3xl italic mb-6">Honesty over Comfort</h3>
+                <p class="text-gray-500 font-light text-lg max-w-2xl leading-relaxed">
+                    We do not offer motivation; we offer resonance. Sometimes, knowing that someone else has articulated your exact pain is the only closure needed.
+                </p>
+            </div>
+        </div>
+
+        <div class="philosophy-row py-16 md:py-24 flex flex-col md:flex-row gap-8 items-baseline group">
+            <span class="text-[0.65rem] text-accent font-mono w-16 opacity-40 group-hover:opacity-100 transition-opacity">02</span>
+            <div class="flex-1">
+                <h3 class="serif text-3xl italic mb-6">The Zero Emotion State</h3>
+                <p class="text-gray-500 font-light text-lg max-w-2xl leading-relaxed">
+                    Growth is a process of shedding. This archive captures the moment a person stops reacting and starts observing. The cold truth is a superpower in a world of noise.
+                </p>
+            </div>
+        </div>
+
+        <div class="philosophy-row py-16 md:py-24 flex flex-col md:flex-row gap-8 items-baseline group">
+            <span class="text-[0.65rem] text-accent font-mono w-16 opacity-40 group-hover:opacity-100 transition-opacity">03</span>
+            <div class="flex-1">
+                <h3 class="serif text-3xl italic mb-6">The Path of the Realist</h3>
+                <p class="text-gray-500 font-light text-lg max-w-2xl leading-relaxed">
+                    The quietest souls often carry the heaviest truths. MY7QUOTES is a sanctuary for those who have found strength in their own silence and clarity in their own boundaries.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="py-20 border-t border-white/5 text-center">
+        <p class="text-[0.6rem] tracking-[0.4em] uppercase opacity-30">All Rights Reserved — My7Quotes</p>
+    </footer>
+<script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        if(menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            menu.classList.add('flex');
+            // GSAP animation for the menu links
+            gsap.from(menu.querySelectorAll('a'), { 
+                opacity: 0, 
+                y: 20, 
+                stagger: 0.1,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        } else {
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+        }
+    }
+</script>
+</body>
+</html>
