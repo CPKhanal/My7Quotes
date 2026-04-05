@@ -11,14 +11,12 @@
         body { background-color: var(--bg); color: var(--paper); font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .serif { font-family: 'Baskervville', serif; }
         
-        /* Desktop Nav Link */
         .nav-link { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; transition: 0.3s; }
         .nav-link:hover { color: var(--accent); }
         
-        .btn-minimal { border: 1px solid rgba(255,255,255,0.1); padding: 1rem 2.5rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.4s; cursor: pointer; background: transparent; color: var(--paper); }
+        .btn-minimal { border: 1px solid rgba(255,255,255,0.1); padding: 1rem 2.5rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.4s; cursor: pointer; background: transparent; color: var(--paper); text-decoration: none; }
         .btn-minimal:hover { background: var(--paper); color: var(--bg); }
 
-        /* Background Canvas */
         #snow-canvas {
             position: fixed;
             top: 0;
@@ -30,10 +28,7 @@
             opacity: 0.3;
         }
 
-        /* Mobile Menu Styling */
         #mobileMenu { background-color: var(--bg); z-index: 100; }
-
-        /* Modal / Card Styling */
         #quoteModal { background-color: rgba(10, 10, 10, 0.98); backdrop-filter: blur(10px); }
         .quote-card { border: 1px solid rgba(255, 255, 255, 0.05); background: #0f0f0f; }
     </style>
@@ -45,7 +40,7 @@
     <nav class="fixed top-0 w-full z-50 p-6 md:p-10 flex justify-between items-center bg-[#0a0a0a]/80 backdrop-blur-md md:bg-transparent">
         <div class="flex items-center gap-3">
             <div class="w-1.5 h-1.5 bg-accent"></div>
-            <span class="text-xs font-bold tracking-[0.4em]">MY7QUOTES</span>
+            <a href="index.html" class="text-xs font-bold tracking-[0.4em] uppercase text-white no-underline">MY7QUOTES</a>
         </div>
 
         <div class="hidden md:flex gap-12">
@@ -54,17 +49,17 @@
             <a href="about.html" class="nav-link">About</a>
         </div>
 
-        <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1.5">
+        <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1.5 bg-transparent border-none cursor-pointer">
             <div class="w-6 h-[1px] bg-white"></div>
             <div class="w-6 h-[1px] bg-white"></div>
         </button>
     </nav>
 
     <div id="mobileMenu" class="fixed inset-0 hidden flex-col items-center justify-center gap-8">
-        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-xs tracking-widest opacity-50">CLOSE</button>
-        <a href="index.html" class="text-xl serif italic text-accent">Intro</a>
-        <a href="archive.html" class="text-xl serif italic">Archive</a>
-        <a href="about.html" class="text-xl serif italic">About</a>
+        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-xs tracking-widest opacity-50 bg-transparent text-white border-none cursor-pointer">CLOSE</button>
+        <a href="index.html" class="text-xl serif italic text-accent no-underline">Intro</a>
+        <a href="archive.html" class="text-xl serif italic text-white no-underline">Archive</a>
+        <a href="about.html" class="text-xl serif italic text-white no-underline">About</a>
     </div>
 
     <section class="min-h-screen flex items-center px-8 md:px-24">
@@ -82,35 +77,36 @@
 
     <div id="quoteModal" class="fixed inset-0 z-[101] flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-500">
         <div class="quote-card max-w-xl w-full p-8 md:p-16 relative">
-            <button onclick="closeModal()" class="absolute top-6 right-8 text-accent text-xs tracking-widest hover:text-white transition">CLOSE</button>
+            <button onclick="closeModal()" class="absolute top-6 right-8 text-accent text-xs tracking-widest hover:text-white transition bg-transparent border-none cursor-pointer">CLOSE</button>
             <span id="fragmentLabel" class="text-accent/40 text-[0.6rem] tracking-[0.4em] uppercase block mb-10">Fragment_Random</span>
             <div id="quoteDisplay" class="serif text-2xl md:text-4xl italic leading-tight text-paper mb-12"></div>
             <div class="flex justify-between items-center border-t border-white/5 pt-8">
                 <span class="text-[0.5rem] tracking-[0.3em] uppercase opacity-30">M7Q Archive</span>
-                <button onclick="showRandomQuote()" class="text-[0.55rem] tracking-widest uppercase text-accent hover:text-white transition">New Insight</button>
+                <button onclick="showRandomQuote()" class="text-[0.55rem] tracking-widest uppercase text-accent hover:text-white transition bg-transparent border-none cursor-pointer">New Insight</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="env-config.js"></script>
 
     <script>
-        // 1. Supabase Initialization
-        const supabaseUrl = window.env.SUPABASE_URL;
-        const supabaseKey = window.env.SUPABASE_ANON_KEY;
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        // 1. Production Supabase Bridge
+        const supabaseUrl = window.env?.SUPABASE_URL;
+        const supabaseKey = window.env?.SUPABASE_ANON_KEY;
+        let _supabase = null;
 
-        // 2. Background Falling Effect
+        if (supabaseUrl && supabaseKey) {
+            _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        } else {
+            console.error("Archive connection failed. Verify Netlify Environment Variables.");
+        }
+
+        // 2. Falling Background Effect
         const canvas = document.getElementById('snow-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize);
         resize();
 
@@ -129,14 +125,10 @@
             }
             draw() {
                 ctx.fillStyle = `rgba(245, 245, 240, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
         }
-
         for(let i = 0; i < 100; i++) particles.push(new Particle());
-
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => { p.update(); p.draw(); });
@@ -144,7 +136,7 @@
         }
         animate();
 
-        // 3. Navigation Toggle
+        // 3. Mobile Navigation
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
             if(menu.classList.contains('hidden')) {
@@ -157,8 +149,9 @@
             }
         }
 
-        // 4. Supabase Quote Logic
+        // 4. Random Quote logic
         async function showRandomQuote() {
+            if (!_supabase) return;
             const display = document.getElementById('quoteDisplay');
             const modal = document.getElementById('quoteModal');
             const label = document.getElementById('fragmentLabel');
@@ -168,12 +161,7 @@
             gsap.to(modal, { opacity: 1, duration: 0.6 });
 
             const randomOffset = Math.floor(Math.random() * 213);
-
-            const { data, error } = await _supabase
-                .from('quotes')
-                .select('id, content')
-                .range(randomOffset, randomOffset)
-                .single();
+            const { data, error } = await _supabase.from('quotes').select('id, content').range(randomOffset, randomOffset).single();
 
             if (error) {
                 display.innerText = "The archive is temporarily silent.";

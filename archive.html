@@ -6,30 +6,40 @@
     <title>MY7QUOTES | The Archive</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Baskervville:ital@0;1&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         :root { --bg: #0a0a0a; --paper: #f5f5f0; --accent: #c5b358; }
-        body { background-color: var(--bg); color: var(--paper); font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--paper); font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .serif { font-family: 'Baskervville', serif; }
         
-        /* Navigation Style matching Home */
         .nav-link { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; transition: 0.3s; }
         .nav-link:hover { color: var(--accent); }
 
-        /* Card Grid Styling */
         input::placeholder { color: rgba(245,245,240,0.2); }
         .grid-container {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
             gap: 1px;
+        }
+
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.2;
         }
     </style>
 </head>
 <body class="bg-[#0a0a0a]">
 
+    <canvas id="snow-canvas"></canvas>
+
     <nav class="fixed top-0 w-full z-50 p-6 md:p-10 flex justify-between items-center bg-[#0a0a0a]/80 backdrop-blur-md md:bg-transparent">
         <div class="flex items-center gap-3">
             <div class="w-1.5 h-1.5 bg-accent"></div>
-            <span class="text-xs font-bold tracking-[0.4em]">MY7QUOTES</span>
+            <a href="index.html" class="text-xs font-bold tracking-[0.4em] uppercase text-white no-underline">MY7QUOTES</a>
         </div>
 
         <div class="hidden md:flex gap-12">
@@ -38,145 +48,178 @@
             <a href="about.html" class="nav-link">About</a>
         </div>
 
-        <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1.5">
+        <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1.5 bg-transparent border-none cursor-pointer">
             <div class="w-6 h-[1px] bg-white"></div>
             <div class="w-6 h-[1px] bg-white"></div>
         </button>
     </nav>
 
     <div id="mobileMenu" class="fixed inset-0 hidden flex-col items-center justify-center gap-8 bg-[#0a0a0a] z-[100]">
-        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-xs tracking-widest opacity-50">CLOSE</button>
-        <a href="index.html" class="text-xl serif italic">Intro</a>
-        <a href="archive.html" class="text-xl serif italic text-accent">Archive</a>
-        <a href="about.html" class="text-xl serif italic">About</a>
+        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-xs tracking-widest opacity-50 bg-transparent text-white border-none cursor-pointer">CLOSE</button>
+        <a href="index.html" class="text-xl serif italic no-underline text-white">Intro</a>
+        <a href="archive.html" class="text-xl serif italic text-accent no-underline">Archive</a>
+        <a href="about.html" class="text-xl serif italic no-underline text-white">About</a>
     </div>
 
-
-<header class="pt-48 pb-20 px-8 md:px-24">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
-        <div class="max-w-2xl">
-            <span class="text-accent text-[0.6rem] tracking-[0.6em] uppercase mb-4 block">Collection Repository</span>
-            <h2 class="serif text-5xl md:text-6xl">The Archive</h2>
+    <header class="pt-48 pb-20 px-8 md:px-24">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+            <div class="max-w-2xl">
+                <span class="text-accent text-[0.6rem] tracking-[0.6em] uppercase mb-4 block">Collection Repository</span>
+                <h2 class="serif text-5xl md:text-6xl">The Archive</h2>
+            </div>
+            
+            <div class="w-full md:w-auto">
+                <input type="text" id="searchInput" placeholder="FILTER RECORDS" 
+                       class="bg-transparent border-b border-white/20 pb-2 w-full md:w-64 focus:outline-none focus:border-accent transition-all text-[0.65rem] tracking-widest uppercase text-white">
+            </div>
         </div>
-        
-        <div class="w-full md:w-auto">
-            <input type="text" id="searchInput" placeholder="FILTER RECORDS" 
-                   class="bg-transparent border-b border-white/20 pb-2 w-full md:w-64 focus:outline-none focus:border-accent transition-all text-[0.65rem] tracking-widest uppercase">
-        </div>
-    </div>
-</header>
+    </header>
 
     <div id="quotesCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-container border-t border-b border-white/10">
         </div>
 
-    <footer class="py-20 text-center opacity-20">
-        <p class="text-[0.5rem] tracking-[0.4em] uppercase">End of Records</p>
+    <footer class="py-20 text-center opacity-30">
+        <p class="text-[0.5rem] tracking-[0.4em] uppercase mb-2">End of Records</p>
+        <p class="text-[0.45rem] tracking-[0.3em] uppercase">All Rights Reserved — <span id="romanYear">MMXXVI</span></p>
     </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- <script src="env-config.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script>
-    let allQuotes = [];
-    
-    // 2. Initialize Supabase
-// NEW WAY (Works on Netlify)
-// We use ?. to prevent crashing if window.env isn't ready yet
-const supabaseUrl = window.env?.SUPABASE_URL;
-const supabaseKey = window.env?.SUPABASE_ANON_KEY;
+    <script>
+        let allQuotes = [];
 
-// Check if they exist before creating the client
-if (!supabaseUrl || !supabaseKey) {
-    console.error("Connection strings missing. Check Netlify Environment Variables.");
-}
+        // 1. Production Supabase Bridge
+        const supabaseUrl = window.env?.SUPABASE_URL;
+        const supabaseKey = window.env?.SUPABASE_ANON_KEY;
+        let _supabase = null;
 
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    // 3. Fetch data from Supabase instead of JSON
-    async function loadData() {
-        const container = document.getElementById('quotesCardGrid');
-        container.innerHTML = `<div class="p-24 text-accent text-xs tracking-widest opacity-50 uppercase col-span-full text-center">Opening Records...</div>`;
-
-        try {
-            const { data, error } = await _supabase
-                .from('quotes')
-                .select('id, content')
-                .order('id', { ascending: true }); // Keep them in order
-
-            if (error) throw error;
-
-            // Map the data to a simple array of strings for your existing filter logic
-            // or keep it as objects to use the real IDs
-            allQuotes = data; 
-            render(allQuotes);
-        } catch (error) {
-            console.error("Error loading Supabase:", error);
-            container.innerHTML = `<div class="p-24 text-red-500 text-xs tracking-widest uppercase col-span-full text-center">Access Denied: Check Connection</div>`;
-        }
-    }
-
-    // 4. Updated Render function to use real IDs
-    function render(list) {
-        const container = document.getElementById('quotesCardGrid');
-        
-        if (list.length === 0) {
-            container.innerHTML = `<div class="p-24 text-white/20 text-xs tracking-widest uppercase col-span-full text-center">No Records Found</div>`;
-            return;
+        if (supabaseUrl && supabaseKey) {
+            _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        } else {
+            document.getElementById('quotesCardGrid').innerHTML = `<div class="p-24 text-red-500 text-xs tracking-widest uppercase col-span-full text-center">System Offline: Check Config</div>`;
         }
 
-        container.innerHTML = list.map((q) => `
-            <div class="bg-[#0a0a0a] p-10 md:p-12 flex flex-col justify-between min-h-[350px] group hover:bg-[#111] transition-all duration-500">
-                <div>
-                    <span class="text-[0.6rem] text-accent/40 font-mono block mb-8">ENTRY_#${q.id}</span>
-                    <p class="serif text-2xl italic leading-snug text-paper/90 group-hover:text-white transition-colors">"${q.content}"</p>
+        // 2. Load Data from Supabase
+        async function loadData() {
+            if (!_supabase) return;
+            const container = document.getElementById('quotesCardGrid');
+            container.innerHTML = `<div class="p-24 text-accent text-xs tracking-widest opacity-50 uppercase col-span-full text-center italic">Opening Records...</div>`;
+
+            try {
+                const { data, error } = await _supabase
+                    .from('quotes')
+                    .select('id, content')
+                    .order('id', { ascending: true });
+
+                if (error) throw error;
+                allQuotes = data; 
+                render(allQuotes);
+            } catch (error) {
+                console.error("Fetch error:", error);
+                container.innerHTML = `<div class="p-24 text-red-500 text-xs tracking-widest uppercase col-span-full text-center">Archive connection failed.</div>`;
+            }
+        }
+
+        function render(list) {
+            const container = document.getElementById('quotesCardGrid');
+            if (list.length === 0) {
+                container.innerHTML = `<div class="p-24 text-white/20 text-xs tracking-widest uppercase col-span-full text-center">No matching fragments found.</div>`;
+                return;
+            }
+
+            container.innerHTML = list.map((q) => `
+                <div class="bg-[#0a0a0a] p-10 md:p-12 flex flex-col justify-between min-h-[350px] group hover:bg-[#0f0f0f] transition-all duration-500">
+                    <div>
+                        <span class="text-[0.6rem] text-accent/40 font-mono block mb-8">ENTRY_#${q.id}</span>
+                        <p class="serif text-2xl italic leading-snug text-paper/90 group-hover:text-white transition-colors">"${q.content}"</p>
+                    </div>
+                    <div class="mt-12 flex justify-between items-center border-t border-white/5 pt-6">
+                        <span class="text-[0.5rem] tracking-[0.3em] uppercase opacity-30">M7Q Archive</span>
+                        <button onclick="copyToClipboard('${q.content.replace(/'/g, "\\'")}', this)" 
+                                class="bg-transparent border-none cursor-pointer text-[0.55rem] tracking-widest uppercase opacity-20 hover:opacity-100 hover:text-accent transition-all text-white">
+                            Copy
+                        </button>
+                    </div>
                 </div>
-                <div class="mt-12 flex justify-between items-center border-t border-white/5 pt-6">
-                    <span class="text-[0.5rem] tracking-[0.3em] uppercase opacity-30">M7Q Archive</span>
-                    <button onclick="copyToClipboard('${q.content.replace(/'/g, "\\'")}', this)" 
-                            class="text-[0.55rem] tracking-widest uppercase opacity-20 hover:opacity-100 hover:text-accent transition-all">
-                        Copy
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
+            `).join('');
+        }
 
-    // 5. Updated Filter logic
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        // Filter based on the content property of our Supabase objects
-        const filtered = allQuotes.filter(q => q.content.toLowerCase().includes(term));
-        render(filtered);
-    });
-
-    // 6. Clipboard Helper (No changes needed)
-    function copyToClipboard(text, btn) {
-        navigator.clipboard.writeText(text);
-        const originalText = btn.innerText;
-        btn.innerText = "COPIED";
-        setTimeout(() => btn.innerText = originalText, 2000);
-    }
-
-    // Start
-    loadData();
-    // Mobile Menu Toggle Logic
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    if(menu.classList.contains('hidden')) {
-        menu.classList.remove('hidden');
-        menu.classList.add('flex');
-        // Simple GSAP entrance animation
-        gsap.from(menu.querySelectorAll('a'), { 
-            opacity: 0, 
-            y: 20, 
-            stagger: 0.1,
-            duration: 0.5 
+        // 3. Search/Filter Logic
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allQuotes.filter(q => q.content.toLowerCase().includes(term));
+            render(filtered);
         });
-    } else {
-        menu.classList.add('hidden');
-        menu.classList.remove('flex');
-    }
-}
-</script>
+
+        // 4. Utility Functions
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text);
+            const originalText = btn.innerText;
+            btn.innerText = "COPIED";
+            setTimeout(() => btn.innerText = originalText, 2000);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if(menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                menu.classList.add('flex');
+                gsap.from(menu.querySelectorAll('a'), { opacity: 0, y: 20, stagger: 0.1, duration: 0.5 });
+            } else {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex');
+            }
+        }
+
+        // 5. Falling Background logic
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.2 + 0.5;
+                this.speed = Math.random() * 0.3 + 0.1;
+                this.opacity = Math.random() * 0.4 + 0.1;
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height) this.y = -10;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(245, 245, 240, ${this.opacity})`;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        for(let i = 0; i < 70; i++) particles.push(new Particle());
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 6. Roman Year Auto-Update
+        function updateRomanYear() {
+            const year = new Date().getFullYear();
+            const toRoman = (num) => {
+                const map = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+                let res = '';
+                for (let k in map) { while (num >= map[k]) { res += k; num -= map[k]; } }
+                return res;
+            };
+            document.getElementById('romanYear').innerText = toRoman(year);
+        }
+
+        updateRomanYear();
+        loadData();
+    </script>
 </body>
 </html>
