@@ -5,6 +5,10 @@ on:
     - cron: '0 0 * * 1,4'
   workflow_dispatch:
 
+# This tells GitHub to use Node.js 24 for all actions in this file
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   sync-data:
     runs-on: ubuntu-latest
@@ -17,7 +21,6 @@ jobs:
 
       - name: Fetch Quotes from Supabase
         run: |
-          # Fetch all data from the quotes table and format it with jq
           curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/quotes?select=*" \
           -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" | jq . > quotes.json
@@ -32,6 +35,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No new quotes to sync."
           else
-            git commit -m "Update quotes.json from Supabase"
+            git commit -m "Update quotes.json from Supabase (Node 24)"
             git push
           fi
