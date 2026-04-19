@@ -91,90 +91,146 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // 1. Production Supabase Bridge
-        const supabaseUrl = window.env?.SUPABASE_URL;
-        const supabaseKey = window.env?.SUPABASE_ANON_KEY;
-        let _supabase = null;
+    // 1. Configuration & Global State
+    const supabaseUrl = window.env?.SUPABASE_URL;
+    const supabaseKey = window.env?.SUPABASE_ANON_KEY;
+    const FALLBACK_JSON_URL = "https://raw.githubusercontent.com/CPKhanal/My7Quotes/main/quotes.json";
+    
+    let _supabase = null;
+    let _cachedQuotes = null; // Stores GitHub JSON if Supabase fails
 
-        if (supabaseUrl && supabaseKey) {
-            _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    if (supabaseUrl && supabaseKey) {
+        _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    } else {
+        console.warn("Supabase credentials missing. Project will rely on GitHub Archive.");
+    }
+
+    // 2. Falling Background Effect (Canvas)
+    const canvas = document.getElementById('snow-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    
+    function resize() { 
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight; 
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.5 + 0.5;
+            this.speed = Math.random() * 0.4 + 0.1;
+            this.opacity = Math.random() * 0.5 + 0.1;
+        }
+        update() {
+            this.y += this.speed;
+            if (this.y > canvas.height) { 
+                this.y = -10; 
+                this.x = Math.random() * canvas.width; 
+            }
+        }
+        draw() {
+            ctx.fillStyle = `rgba(245, 245, 240, ${this.opacity})`;
+            ctx.beginPath(); 
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
+            ctx.fill();
+        }
+    }
+
+    for(let i = 0; i < 100; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    // 3. Mobile Navigation Logic
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        if(menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            menu.classList.add('flex');
+            gsap.from(menu.children, { opacity: 0, y: 20, stagger: 0.1 });
         } else {
-            console.error("Archive connection failed. Verify Netlify Environment Variables.");
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
         }
+    }
 
-        // 2. Falling Background Effect
-        const canvas = document.getElementById('snow-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        resize();
+    // 4. Enhanced Random Quote Logic (Supabase with GitHub Fallback)
+    async function showRandomQuote() {
+        const display = document.getElementById('quoteDisplay');
+        const modal = document.getElementById('quoteModal');
+        const label = document.getElementById('fragmentLabel');
+        
+        display.innerText = "Consulting the archive...";
+        modal.classList.remove('pointer-events-none');
+        gsap.to(modal, { opacity: 1, duration: 0.6 });
 
-        class Particle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speed = Math.random() * 0.4 + 0.1;
-                this.opacity = Math.random() * 0.5 + 0.1;
-            }
-            update() {
-                this.y += this.speed;
-                if (this.y > canvas.height) { this.y = -10; this.x = Math.random() * canvas.width; }
-            }
-            draw() {
-                ctx.fillStyle = `rgba(245, 245, 240, ${this.opacity})`;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-            }
-        }
-        for(let i = 0; i < 100; i++) particles.push(new Particle());
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
-        animate();
+        let finalQuote = null;
 
-        // 3. Mobile Navigation
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            if(menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                menu.classList.add('flex');
-                gsap.from(menu.children, { opacity: 0, y: 20, stagger: 0.1 });
-            } else {
-                menu.classList.add('hidden');
-                menu.classList.remove('flex');
+        // --- Try Supabase First ---
+        if (_supabase) {
+            try {
+                const randomOffset = Math.floor(Math.random() * 213);
+                const { data, error } = await _supabase
+                    .from('quotes')
+                    .select('id, content')
+                    .range(randomOffset, randomOffset)
+                    .single();
+
+                if (!error && data) {
+                    finalQuote = { id: data.id, content: data.content };
+                }
+            } catch (err) {
+                console.error("Supabase Error:", err);
             }
         }
 
-        // 4. Random Quote logic
-        async function showRandomQuote() {
-            if (!_supabase) return;
-            const display = document.getElementById('quoteDisplay');
-            const modal = document.getElementById('quoteModal');
-            const label = document.getElementById('fragmentLabel');
-            
-            display.innerText = "Consulting the archive...";
-            modal.classList.remove('pointer-events-none');
-            gsap.to(modal, { opacity: 1, duration: 0.6 });
-
-            const randomOffset = Math.floor(Math.random() * 213);
-            const { data, error } = await _supabase.from('quotes').select('id, content').range(randomOffset, randomOffset).single();
-
-            if (error) {
-                display.innerText = "The archive is temporarily silent.";
-            } else {
-                display.innerText = `"${data.content}"`;
-                label.innerText = `Fragment_#${data.id}`;
+        // --- Fallback to GitHub JSON if Supabase failed or returned null ---
+        if (!finalQuote) {
+            try {
+                if (!_cachedQuotes) {
+                    const response = await fetch(FALLBACK_JSON_URL);
+                    _cachedQuotes = await response.json();
+                }
+                
+                const randomIndex = Math.floor(Math.random() * _cachedQuotes.length);
+                const selected = _cachedQuotes[randomIndex];
+                
+                finalQuote = {
+                    id: selected.id || "LCL",
+                    content: selected.content || selected.quote // Handles varied JSON keys
+                };
+            } catch (err) {
+                console.error("Fallback Archive failed:", err);
             }
         }
 
-        function closeModal() {
-            const modal = document.getElementById('quoteModal');
-            gsap.to(modal, { opacity: 0, duration: 0.4, onComplete: () => modal.classList.add('pointer-events-none') });
+        // --- Update UI ---
+        if (finalQuote) {
+            display.innerText = `"${finalQuote.content}"`;
+            label.innerText = `Fragment_#${finalQuote.id}`;
+        } else {
+            display.innerText = "The archive is temporarily silent.";
+            label.innerText = "Fragment_Error";
         }
-    </script>
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('quoteModal');
+        gsap.to(modal, { 
+            opacity: 0, 
+            duration: 0.4, 
+            onComplete: () => modal.classList.add('pointer-events-none') 
+        });
+    }
+</script>
 </body>
 </html>

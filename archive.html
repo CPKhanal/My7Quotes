@@ -87,139 +87,171 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        let allQuotes = [];
+    let allQuotes = [];
 
-        // 1. Production Supabase Bridge
-        const supabaseUrl = window.env?.SUPABASE_URL;
-        const supabaseKey = window.env?.SUPABASE_ANON_KEY;
-        let _supabase = null;
+    // 1. Configuration & Constants
+    const supabaseUrl = window.env?.SUPABASE_URL;
+    const supabaseKey = window.env?.SUPABASE_ANON_KEY;
+    // Note: Using the raw.githubusercontent URL is required for fetch to work
+    const FALLBACK_URL = "https://raw.githubusercontent.com/CPKhanal/My7Quotes/main/quotes.json";
+    
+    let _supabase = null;
 
-        if (supabaseUrl && supabaseKey) {
-            _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-        } else {
-            document.getElementById('quotesCardGrid').innerHTML = `<div class="p-24 text-red-500 text-xs tracking-widest uppercase col-span-full text-center">System Offline: Check Config</div>`;
-        }
+    if (supabaseUrl && supabaseKey) {
+        _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    }
 
-        // 2. Load Data from Supabase
-        async function loadData() {
-            if (!_supabase) return;
-            const container = document.getElementById('quotesCardGrid');
-            container.innerHTML = `<div class="p-24 text-accent text-xs tracking-widest opacity-50 uppercase col-span-full text-center italic">Opening Records...</div>`;
+    // 2. Load Data Logic (Supabase with GitHub Fallback)
+    async function loadData() {
+        const container = document.getElementById('quotesCardGrid');
+        container.innerHTML = `<div class="p-24 text-accent text-xs tracking-widest opacity-50 uppercase col-span-full text-center italic">Opening Records...</div>`;
 
+        let fetchSuccess = false;
+
+        // --- Try Supabase ---
+        if (_supabase) {
             try {
                 const { data, error } = await _supabase
                     .from('quotes')
                     .select('id, content')
                     .order('id', { ascending: true });
 
-                if (error) throw error;
-                allQuotes = data; 
-                render(allQuotes);
-            } catch (error) {
-                console.error("Fetch error:", error);
-                container.innerHTML = `<div class="p-24 text-red-500 text-xs tracking-widest uppercase col-span-full text-center">Archive connection failed.</div>`;
+                if (!error && data) {
+                    allQuotes = data;
+                    fetchSuccess = true;
+                }
+            } catch (err) {
+                console.warn("Supabase connection failed. Attempting fallback...");
             }
         }
 
-        function render(list) {
-            const container = document.getElementById('quotesCardGrid');
-            if (list.length === 0) {
-                container.innerHTML = `<div class="p-24 text-white/20 text-xs tracking-widest uppercase col-span-full text-center">No matching fragments found.</div>`;
+        // --- Try GitHub Fallback (if Supabase failed or is not configured) ---
+        if (!fetchSuccess) {
+            try {
+                const response = await fetch(FALLBACK_URL);
+                if (!response.ok) throw new Error("Fallback source unreachable");
+                
+                const rawData = await response.json();
+                
+                // Standardize keys (handles 'quote' vs 'content' keys in JSON)
+                allQuotes = rawData.map(item => ({
+                    id: item.id || 'N/A',
+                    content: item.content || item.quote
+                }));
+                
+                fetchSuccess = true;
+                console.log("Loaded fragments from GitHub Archive.");
+            } catch (err) {
+                console.error("Critical: All sources offline.", err);
+                container.innerHTML = `<div class="p-24 text-red-500 text-xs tracking-widest uppercase col-span-full text-center">Archive Connection Failed.</div>`;
                 return;
             }
+        }
 
-            container.innerHTML = list.map((q) => `
-                <div class="bg-[#0a0a0a] p-10 md:p-12 flex flex-col justify-between min-h-[350px] group hover:bg-[#0f0f0f] transition-all duration-500">
-                    <div>
-                        <span class="text-[0.6rem] text-accent/40 font-mono block mb-8">ENTRY_#${q.id}</span>
-                        <p class="serif text-2xl italic leading-snug text-paper/90 group-hover:text-white transition-colors">"${q.content}"</p>
-                    </div>
-                    <div class="mt-12 flex justify-between items-center border-t border-white/5 pt-6">
-                        <span class="text-[0.5rem] tracking-[0.3em] uppercase opacity-30">M7Q Archive</span>
-                        <button onclick="copyToClipboard('${q.content.replace(/'/g, "\\'")}', this)" 
-                                class="bg-transparent border-none cursor-pointer text-[0.55rem] tracking-widest uppercase opacity-20 hover:opacity-100 hover:text-accent transition-all text-white">
-                            Copy
-                        </button>
-                    </div>
+        render(allQuotes);
+    }
+
+    // 3. UI Rendering
+    function render(list) {
+        const container = document.getElementById('quotesCardGrid');
+        if (list.length === 0) {
+            container.innerHTML = `<div class="p-24 text-white/20 text-xs tracking-widest uppercase col-span-full text-center">No matching fragments found.</div>`;
+            return;
+        }
+
+        container.innerHTML = list.map((q) => `
+            <div class="bg-[#0a0a0a] p-10 md:p-12 flex flex-col justify-between min-h-[350px] group hover:bg-[#0f0f0f] transition-all duration-500 border-r border-b border-white/5">
+                <div>
+                    <span class="text-[0.6rem] text-accent/40 font-mono block mb-8">ENTRY_#${q.id}</span>
+                    <p class="serif text-2xl italic leading-snug text-paper/90 group-hover:text-white transition-colors">"${q.content}"</p>
                 </div>
-            `).join('');
+                <div class="mt-12 flex justify-between items-center border-t border-white/5 pt-6">
+                    <span class="text-[0.5rem] tracking-[0.3em] uppercase opacity-30">M7Q Archive</span>
+                    <button onclick="copyToClipboard('${q.content.replace(/'/g, "\\'")}', this)" 
+                            class="bg-transparent border-none cursor-pointer text-[0.55rem] tracking-widest uppercase opacity-20 hover:opacity-100 hover:text-accent transition-all text-white">
+                        Copy
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // 4. Search/Filter Logic
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allQuotes.filter(q => q.content.toLowerCase().includes(term));
+        render(filtered);
+    });
+
+    // 5. Utility & Nav Functions
+    function copyToClipboard(text, btn) {
+        navigator.clipboard.writeText(text);
+        const originalText = btn.innerText;
+        btn.innerText = "COPIED";
+        setTimeout(() => btn.innerText = originalText, 2000);
+    }
+
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        if(menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            menu.classList.add('flex');
+            gsap.from(menu.querySelectorAll('a'), { opacity: 0, y: 20, stagger: 0.1, duration: 0.5 });
+        } else {
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
         }
+    }
 
-        // 3. Search/Filter Logic
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allQuotes.filter(q => q.content.toLowerCase().includes(term));
-            render(filtered);
-        });
+    // 6. Visual Effects (Canvas Snow)
+    const canvas = document.getElementById('snow-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
 
-        // 4. Utility Functions
-        function copyToClipboard(text, btn) {
-            navigator.clipboard.writeText(text);
-            const originalText = btn.innerText;
-            btn.innerText = "COPIED";
-            setTimeout(() => btn.innerText = originalText, 2000);
+    class Particle {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.2 + 0.5;
+            this.speed = Math.random() * 0.3 + 0.1;
+            this.opacity = Math.random() * 0.4 + 0.1;
         }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            if(menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                menu.classList.add('flex');
-                gsap.from(menu.querySelectorAll('a'), { opacity: 0, y: 20, stagger: 0.1, duration: 0.5 });
-            } else {
-                menu.classList.add('hidden');
-                menu.classList.remove('flex');
-            }
+        update() {
+            this.y += this.speed;
+            if (this.y > canvas.height) this.y = -10;
         }
-
-        // 5. Falling Background logic
-        const canvas = document.getElementById('snow-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.2 + 0.5;
-                this.speed = Math.random() * 0.3 + 0.1;
-                this.opacity = Math.random() * 0.4 + 0.1;
-            }
-            update() {
-                this.y += this.speed;
-                if (this.y > canvas.height) this.y = -10;
-            }
-            draw() {
-                ctx.fillStyle = `rgba(245, 245, 240, ${this.opacity})`;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-            }
+        draw() {
+            ctx.fillStyle = `rgba(245, 245, 240, ${this.opacity})`;
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
         }
-        for(let i = 0; i < 70; i++) particles.push(new Particle());
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
-        animate();
+    }
+    for(let i = 0; i < 70; i++) particles.push(new Particle());
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
 
-        // 6. Roman Year Auto-Update
-        function updateRomanYear() {
-            const year = new Date().getFullYear();
-            const toRoman = (num) => {
-                const map = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
-                let res = '';
-                for (let k in map) { while (num >= map[k]) { res += k; num -= map[k]; } }
-                return res;
-            };
-            document.getElementById('romanYear').innerText = toRoman(year);
-        }
+    // 7. Initialize
+    function updateRomanYear() {
+        const year = new Date().getFullYear();
+        const toRoman = (num) => {
+            const map = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+            let res = '';
+            for (let k in map) { while (num >= map[k]) { res += k; num -= map[k]; } }
+            return res;
+        };
+        const el = document.getElementById('romanYear');
+        if (el) el.innerText = toRoman(year);
+    }
 
-        updateRomanYear();
-        loadData();
-    </script>
+    updateRomanYear();
+    loadData();
+</script>
 </body>
 </html>
