@@ -5,10 +5,6 @@ on:
     - cron: '0 0 * * 1,4'
   workflow_dispatch:
 
-# This tells GitHub to use Node.js 24 for all actions in this file
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   sync-data:
     runs-on: ubuntu-latest
@@ -16,8 +12,9 @@ jobs:
       contents: write
 
     steps:
+      # Updated to v5 to match Node 24 runners
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch Quotes from Supabase
         run: |
@@ -35,6 +32,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No new quotes to sync."
           else
-            git commit -m "Update quotes.json from Supabase (Node 24)"
+            git commit -m "Update quotes.json from Supabase"
             git push
           fi
